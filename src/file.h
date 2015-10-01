@@ -18,25 +18,50 @@
 #include <QString>
 #include <QMimeType>
 #include <QFileInfo>
+#include <QIcon>
+#include <vector>
+#include <map>
+#include <memory>
+using std::vector;
+using std::map;
+using std::shared_ptr;
+using std::unique_ptr;
+#include "interfaces/baseobjects.h"
 #include "utils/search/iindexable.h"
 
 namespace Files {
 
-struct File final : public IIndexable
+class File final : public A2Item, public IIndexable
 {
-    File() {}
-    File(QString path, QMimeType mimetype)
-        : path(path), mimetype(mimetype), usage(0){}
-    ~File(){}
+    friend class Extension;
+    friend class Indexer;
 
+public:
+    File() = delete;
+    File(const File &) = delete;
+    File(QString path, QMimeType mimetype, short usage = 0);
 
-    QStringList aliases() const override {
-        return QStringList() << QFileInfo(path).fileName();
-    }
+    QString name() const override;
+    QString info() const override;
+    QIcon icon() const override;
+    void activate() override;
+    bool hasChildren() const override;
+    vector<shared_ptr<A2Item>> children() override;
+    vector<QString> aliases() const override;
 
-    QString path;
-    QMimeType mimetype;
-    mutable unsigned short usage;
+    const QString &path() const { return path_; }
+    const QMimeType &mimetype() const { return mimetype_; }
+    short usage() const { return usage_; }
+    void incUsage() {++usage_;}
+
+    static void clearIconCache();
+
+private:
+    QString path_;
+    QMimeType mimetype_;
+    mutable short usage_;
+    unique_ptr<vector<shared_ptr<A2Item>>> children_;
+    static map<QString, QIcon> iconCache_;
 };
 
 }
