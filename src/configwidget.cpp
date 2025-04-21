@@ -8,6 +8,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QStandardPaths>
+#include <albert/widgets.h>
 #include <map>
 using namespace std;
 
@@ -22,20 +23,35 @@ ConfigWidget::ConfigWidget(Plugin *plu, QWidget *par) : QWidget(par), plugin(plu
 {
     ui.setupUi(this);
 
-    ALBERT_PROPERTY_CONNECT_CHECKBOX(plugin, fs_browsers_match_case_sensitive,
-                                     ui.matchCaseSensitiveCheckBox)
+    albert::util::widgets::bind(ui.matchCaseSensitiveCheckBox,
+                                plugin,
+                                &Plugin::fs_browsers_match_case_sensitive,
+                                &Plugin::set_fs_browsers_match_case_sensitive,
+                                &Plugin::fs_browsers_match_case_sensitive_changed);
 
-    ALBERT_PROPERTY_CONNECT_CHECKBOX(plugin, fs_browsers_show_hidden,
-                                     ui.showHiddenFilesCheckBox)
+    albert::util::widgets::bind(ui.showHiddenFilesCheckBox,
+                                plugin,
+                                &Plugin::fs_browsers_show_hidden,
+                                &Plugin::set_fs_browsers_show_hidden,
+                                &Plugin::fs_browsers_show_hidden_changed);
 
-    ALBERT_PROPERTY_CONNECT_CHECKBOX(plugin, fs_browsers_sort_case_insensitive,
-                                     ui.sortCaseInsensitveCheckBox)
+    albert::util::widgets::bind(ui.sortCaseInsensitveCheckBox,
+                                plugin,
+                                &Plugin::fs_browsers_sort_case_insensitive,
+                                &Plugin::set_fs_browsers_sort_case_insensitive,
+                                &Plugin::fs_browsers_sort_case_insensitive_changed);
 
-    ALBERT_PROPERTY_CONNECT_CHECKBOX(plugin, fs_browsers_show_dirs_first,
-                                     ui.showDirsFirstCheckBox)
+    albert::util::widgets::bind(ui.showDirsFirstCheckBox,
+                                plugin,
+                                &Plugin::fs_browsers_show_dirs_first,
+                                &Plugin::set_fs_browsers_show_dirs_first,
+                                &Plugin::fs_browsers_show_dirs_first_changed);
 
-    ALBERT_PROPERTY_CONNECT_CHECKBOX(plugin, index_file_path,
-                                     ui.indexFilePathCheckBox)
+    albert::util::widgets::bind(ui.indexFilePathCheckBox,
+                                plugin,
+                                &Plugin::index_file_path,
+                                &Plugin::set_index_file_path,
+                                &Plugin::index_file_path_changed);
 
     auto &index_paths = plu->fsIndex().indexPaths();
     paths_model.setStringList(getPaths(index_paths));
