@@ -12,7 +12,7 @@
 #include <albert/property.h>
 
 class Plugin : public albert::ExtensionPlugin,
-               public albert::IndexQueryHandler
+               public albert::util::IndexQueryHandler
 {
     ALBERT_PLUGIN
     ALBERT_PLUGIN_PROPERTY(bool, index_file_path, false)

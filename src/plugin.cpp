@@ -14,6 +14,7 @@
 ALBERT_LOGGING_CATEGORY("files")
 using namespace albert;
 using namespace std;
+using namespace util;
 
 const char* CFG_PATHS = "paths";
 const char* CFG_MIME_FILTERS = "mimeFilters";

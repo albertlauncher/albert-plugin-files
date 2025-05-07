@@ -8,9 +8,11 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QStandardPaths>
-#include <albert/widgets.h>
+#include <albert/widgetsutil.h>
 #include <map>
+using namespace albert;
 using namespace std;
+using namespace util;
 
 static QStringList getPaths(const map<QString,unique_ptr<FsIndexPath>> &index_paths){
     QStringList paths;
@@ -23,35 +25,35 @@ ConfigWidget::ConfigWidget(Plugin *plu, QWidget *par) : QWidget(par), plugin(plu
 {
     ui.setupUi(this);
 
-    albert::util::widgets::bind(ui.matchCaseSensitiveCheckBox,
-                                plugin,
-                                &Plugin::fs_browsers_match_case_sensitive,
-                                &Plugin::set_fs_browsers_match_case_sensitive,
-                                &Plugin::fs_browsers_match_case_sensitive_changed);
+    bind(ui.matchCaseSensitiveCheckBox,
+         plugin,
+         &Plugin::fs_browsers_match_case_sensitive,
+         &Plugin::set_fs_browsers_match_case_sensitive,
+         &Plugin::fs_browsers_match_case_sensitive_changed);
 
-    albert::util::widgets::bind(ui.showHiddenFilesCheckBox,
-                                plugin,
-                                &Plugin::fs_browsers_show_hidden,
-                                &Plugin::set_fs_browsers_show_hidden,
-                                &Plugin::fs_browsers_show_hidden_changed);
+    bind(ui.showHiddenFilesCheckBox,
+         plugin,
+         &Plugin::fs_browsers_show_hidden,
+         &Plugin::set_fs_browsers_show_hidden,
+         &Plugin::fs_browsers_show_hidden_changed);
 
-    albert::util::widgets::bind(ui.sortCaseInsensitveCheckBox,
-                                plugin,
-                                &Plugin::fs_browsers_sort_case_insensitive,
-                                &Plugin::set_fs_browsers_sort_case_insensitive,
-                                &Plugin::fs_browsers_sort_case_insensitive_changed);
+    bind(ui.sortCaseInsensitveCheckBox,
+         plugin,
+         &Plugin::fs_browsers_sort_case_insensitive,
+         &Plugin::set_fs_browsers_sort_case_insensitive,
+         &Plugin::fs_browsers_sort_case_insensitive_changed);
 
-    albert::util::widgets::bind(ui.showDirsFirstCheckBox,
-                                plugin,
-                                &Plugin::fs_browsers_show_dirs_first,
-                                &Plugin::set_fs_browsers_show_dirs_first,
-                                &Plugin::fs_browsers_show_dirs_first_changed);
+    bind(ui.showDirsFirstCheckBox,
+         plugin,
+         &Plugin::fs_browsers_show_dirs_first,
+         &Plugin::set_fs_browsers_show_dirs_first,
+         &Plugin::fs_browsers_show_dirs_first_changed);
 
-    albert::util::widgets::bind(ui.indexFilePathCheckBox,
-                                plugin,
-                                &Plugin::index_file_path,
-                                &Plugin::set_index_file_path,
-                                &Plugin::index_file_path_changed);
+    bind(ui.indexFilePathCheckBox,
+         plugin,
+         &Plugin::index_file_path,
+         &Plugin::set_index_file_path,
+         &Plugin::index_file_path_changed);
 
     auto &index_paths = plu->fsIndex().indexPaths();
     paths_model.setStringList(getPaths(index_paths));
