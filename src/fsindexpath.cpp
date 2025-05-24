@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Manuel Schneider
+// Copyright (c) 2022-2025 Manuel Schneider
 
 #include "fileitems.h"
 #include "fsindexnodes.h"
@@ -17,9 +17,9 @@ FsIndexPath::FsIndexPath(const QString &path) : root_(RootNode::make(path))
 
     // Be tolerant but warn
     if (QFileInfo fi(root_->filePath()); !fi.exists())
-        WARN << QString("Root path does not exist: %1.").arg(fi.absolutePath());
+        WARN << "Root path does not exist:" << fi.absolutePath();
     else if (!fi.isDir())
-        WARN << QString("Root path is not a directory: %1.").arg(fi.absolutePath());
+        WARN << "Root path is not a directory:" << fi.absolutePath();
 
     self = make_shared<StandardFile>(root_->filePath(), DirNode::dirMimeType());
 }
@@ -34,15 +34,15 @@ void FsIndexPath::deserialize(const QJsonObject &json_object)
 
 QString FsIndexPath::path() const { return root_->filePath(); }
 
-void FsIndexPath::update(const bool &abort, std::function<void(const QString &)> status)
+void FsIndexPath::update(const bool &abort, function<void(const QString &)> status)
 {
     IndexSettings s;
 
     s.root_path = this->path();
 
-    for (const auto &pattern : name_filters)
+    for (const auto &pattern : as_const(name_filters))
         s.name_filters.emplace_back(pattern);
-    for (const auto &pattern : mime_filters)
+    for (const auto &pattern : as_const(mime_filters))
         s.mime_filters.emplace_back(QRegularExpression::fromWildcard(pattern,
                                                                      Qt::CaseSensitive,
                                                                      QRegularExpression::UnanchoredWildcardConversion));
@@ -50,7 +50,7 @@ void FsIndexPath::update(const bool &abort, std::function<void(const QString &)>
     s.follow_symlinks = follow_symlinks;
     s.max_depth = max_depth;
     s.forced = force_update;
-    std::set<QString> indexed_dirs;
+    set<QString> indexed_dirs;
 
     root_->update(root_, abort, status, s, indexed_dirs, 1);
 
@@ -119,7 +119,7 @@ void FsIndexPath::setWatchFilesystem(bool val)
 {
     watch_fs = val;
     if (val){
-        std::vector<std::shared_ptr<DirNode>> nodes;
+        vector<shared_ptr<DirNode>> nodes;
         root_->nodes(nodes);
         QStringList l;
         for (auto &node : nodes)

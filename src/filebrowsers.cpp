@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Manuel Schneider
+// Copyright (c) 2022-2025 Manuel Schneider
 
 #include "filebrowsers.h"
 #include "fileitems.h"
@@ -9,6 +9,7 @@
 #include <QFileInfo>
 #include <QMimeDatabase>
 #include <QFileInfo>
+using namespace Qt::StringLiterals;
 using namespace albert;
 using namespace std;
 
@@ -29,12 +30,12 @@ QFileInfoList FilePathBrowser::listFiles(const QString &filter_path) const
 
     if (dir.exists())
     {
-        auto pattern = query_file_info.fileName() + "*";
+        auto pattern = query_file_info.fileName() + u'*';
 
         auto filters = QDir::AllEntries | QDir::NoDotAndDotDot;
         if (match_case_sensitive_)
             filters |= QDir::CaseSensitive;
-        if (show_hidden_ || query_file_info.fileName().startsWith(QStringLiteral(".")))
+        if (show_hidden_ || query_file_info.fileName().startsWith(u'.'))
             filters |= QDir::Hidden;
 
         QDir::SortFlags sort_flags = QDir::Name;
@@ -58,22 +59,23 @@ RootBrowser::RootBrowser(bool &matchCaseSensitive, bool &showHidden,
     FilePathBrowser(matchCaseSensitive, showHidden, sortCaseSensitive, showDirsFirst)
 {}
 
-QString RootBrowser::id() const { return "rootbrowser"; }
+QString RootBrowser::id() const { return u"rootbrowser"_s; }
 
 QString RootBrowser::name() const { return tr("Root browser"); }
 
 QString RootBrowser::description() const { return tr("Browse root directory by path"); }
 
-QString RootBrowser::defaultTrigger() const { return QStringLiteral("/"); }
+QString RootBrowser::defaultTrigger() const { return u"/"_s; }
 
 void RootBrowser::handleTriggerQuery(Query &query)
 {
     vector<shared_ptr<Item>> results;
     QMimeDatabase mimeDatabase;
-    for (const auto &fi : listFiles(defaultTrigger() + query.string()))
+    const auto file_infos = listFiles(defaultTrigger() + query.string());
+    for (const auto &fi : file_infos)
     {
-        QMimeType mimetype = mimeDatabase.mimeTypeForFile(fi);
-        QString completion = fi.filePath().mid(1);
+        const auto mimetype = mimeDatabase.mimeTypeForFile(fi);
+        auto completion = fi.filePath().mid(1);
         if (fi.isDir())
             completion.append(QDir::separator());
 
@@ -91,23 +93,24 @@ HomeBrowser::HomeBrowser(bool &matchCaseSensitive, bool &showHidden,
     FilePathBrowser(matchCaseSensitive, showHidden, sortCaseSensitive, showDirsFirst)
 {}
 
-QString HomeBrowser::id() const { return "homebrowser"; }
+QString HomeBrowser::id() const { return u"homebrowser"_s; }
 
 QString HomeBrowser::name() const { return tr("Home browser"); }
 
 QString HomeBrowser::description() const { return tr("Browse home directory by path"); }
 
-QString HomeBrowser::defaultTrigger() const { return QStringLiteral("~"); }
+QString HomeBrowser::defaultTrigger() const { return u"~"_s; }
 
 void HomeBrowser::handleTriggerQuery(Query &query)
 {
     vector<shared_ptr<Item>> results;
     QMimeDatabase mimeDatabase;
-    auto home_length = QDir::homePath().size();
-    for (const auto &fi : listFiles(QDir::homePath() + query.string()))
+    const auto home_length = QDir::homePath().size();
+    const auto file_infos = listFiles(QDir::homePath() + query.string());
+    for (const auto &fi : file_infos)
     {
-        QMimeType mimetype = mimeDatabase.mimeTypeForFile(fi);
-        QString completion = fi.filePath().mid(home_length);
+        const auto mimetype = mimeDatabase.mimeTypeForFile(fi);
+        auto completion = fi.filePath().mid(home_length);
         if (fi.isDir())
             completion.append(QDir::separator());
 

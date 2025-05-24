@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Manuel Schneider
+// Copyright (c) 2022-2025 Manuel Schneider
 
 #include "namefilterdialog.h"
 #include <QRegularExpression>
@@ -7,21 +7,21 @@
 NameFilterDialog::NameFilterDialog(const QStringList &filters, QWidget *parent): QDialog(parent)
 {
     ui.setupUi(this);
-    ui.plainTextEdit->setPlainText(filters.join('\n'));
+    ui.plainTextEdit->setPlainText(filters.join(u'\n'));
     connect(ui.plainTextEdit, &QPlainTextEdit::textChanged, this, [this](){
-        auto patterns = ui.plainTextEdit->toPlainText().split("\n");
+        auto patterns = ui.plainTextEdit->toPlainText().split(u'\n');
         QStringList errors;
         for (auto &pattern : patterns)
             if (QRegularExpression re(pattern); !re.isValid())
-                errors << QString("'%1' %2").arg(pattern, re.errorString());
+                errors << QStringLiteral("'%1' %2").arg(pattern, re.errorString());
 
         ui.buttonBox->button(QDialogButtonBox::Ok)->setEnabled(errors.isEmpty());
 
-        ui.label_error->setText(errors.join(", "));
+        ui.label_error->setText(errors.join(QStringLiteral(", ")));
     });
 }
 
 QStringList NameFilterDialog::filters() const
 {
-    return ui.plainTextEdit->toPlainText().split("\n", Qt::SkipEmptyParts);
+    return ui.plainTextEdit->toPlainText().split(u'\n', Qt::SkipEmptyParts);
 }

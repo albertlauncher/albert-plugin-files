@@ -1,4 +1,4 @@
-// Copyright (c) 2022-2024 Manuel Schneider
+// Copyright (c) 2022-2025 Manuel Schneider
 
 #include "configwidget.h"
 #include "fileitems.h"
@@ -12,30 +12,36 @@
 #include <albert/logging.h>
 #include <albert/standarditem.h>
 ALBERT_LOGGING_CATEGORY("files")
+using namespace Qt::StringLiterals;
+using namespace albert::util;
 using namespace albert;
 using namespace std;
-using namespace util;
 
-const char* CFG_PATHS = "paths";
-const char* CFG_MIME_FILTERS = "mimeFilters";
-const QStringList DEF_MIME_FILTERS = { "inode/directory" };
-const char* CFG_NAME_FILTERS = "nameFilters";
+namespace
+{
+static const auto CFG_PATHS               = u"paths"_s;
+static const auto CFG_MIME_FILTERS        = u"mimeFilters"_s;
+static const QStringList DEF_MIME_FILTERS = { u"inode/directory"_s };
+static const auto CFG_NAME_FILTERS        = u"nameFilters"_s;
+static const QStringList DEF_NAME_FILTERS
 #if defined Q_OS_MACOS
-const QStringList DEF_NAME_FILTERS = { "\\.DS_Store" };
+    = { u"\\.DS_Store"_s };
 #else
-const QStringList DEF_NAME_FILTERS = {};
+    = {};
 #endif
-const char* CFG_INDEX_HIDDEN = "indexhidden";
-const bool DEF_INDEX_HIDDEN = false;
-const char* CFG_FOLLOW_SYMLINKS = "followSymlinks";
-const bool DEF_FOLLOW_SYMLINKS = false;
-const char* CFG_FS_WATCHES = "useFileSystemWatches";
-const bool DEF_FS_WATCHES = false;
-const char* CFG_MAX_DEPTH = "maxDepth";
-const uint8_t DEF_MAX_DEPTH = 255;
-const char* CFG_SCAN_INTERVAL = "scanInterval";
-const uint DEF_SCAN_INTERVAL = 5;
-const char* INDEX_FILE_NAME = "file_index.json";
+static const auto CFG_INDEX_HIDDEN    = u"indexhidden"_s;
+static const auto DEF_INDEX_HIDDEN    = false;
+static const auto CFG_FOLLOW_SYMLINKS = u"followSymlinks"_s;
+static const auto DEF_FOLLOW_SYMLINKS = false;
+static const auto CFG_FS_WATCHES      = u"useFileSystemWatches"_s;
+static const auto DEF_FS_WATCHES      = false;
+static const auto CFG_MAX_DEPTH       = u"maxDepth"_s;
+static const auto DEF_MAX_DEPTH       = 255u;
+static const auto CFG_SCAN_INTERVAL   = u"scanInterval"_s;
+static const auto DEF_SCAN_INTERVAL   = 5;
+static const auto INDEX_FILE_NAME     = "file_index.json";
+}
+
 applications::Plugin *apps;
 
 Plugin::Plugin():
@@ -58,7 +64,8 @@ Plugin::Plugin():
     tryCreateDirectory(cache_path);
 
     QJsonObject object;
-    if (QFile file(cache_path/INDEX_FILE_NAME); file.open(QIODevice::ReadOnly))
+    if (QFile file(cache_path / INDEX_FILE_NAME);
+        file.open(QIODevice::ReadOnly))
         object = QJsonDocument(QJsonDocument::fromJson(file.readAll())).object();
 
     auto s = settings();
@@ -68,7 +75,7 @@ Plugin::Plugin():
     restore_fs_browsers_sort_case_insensitive(s);
     restore_fs_browsers_show_dirs_first(s);
 
-    auto paths = s->value(CFG_PATHS, QStringList()).toStringList();
+    const auto paths = s->value(CFG_PATHS, QStringList()).toStringList();
 
     for (const auto &path : paths){
         auto fsp = make_unique<FsIndexPath>(path);
@@ -90,11 +97,11 @@ Plugin::Plugin():
     }
 
     update_item = StandardItem::make(
-        "scan_files",
+        u"scan_files"_s,
         tr("Update index"),
         tr("Update the file index"),
-        {":app_icon"},
-        {{"scan_files", tr("Scan"), [this](){ fs_index_.update(); }}}
+        {u":app_icon"_s},
+        {{u"scan_files"_s, tr("Scan"), [this]{ fs_index_.update(); }}}
     );
 }
 
@@ -120,7 +127,9 @@ Plugin::~Plugin()
     }
     s->setValue(CFG_PATHS, paths);
 
-    if (QFile file(QDir(cacheLocation()).filePath(INDEX_FILE_NAME)); file.open(QIODevice::WriteOnly)) {
+    if (QFile file(cacheLocation() / INDEX_FILE_NAME);
+        file.open(QIODevice::WriteOnly))
+    {
         DEBG << "Storing file index to" << file.fileName();
         file.write(QJsonDocument(object).toJson(QJsonDocument::Compact));
         file.close();
@@ -152,29 +161,23 @@ void Plugin::updateIndexItems()
     // Add update item
     ii.emplace_back(update_item, update_item->text());
 
-    // Add trash item
+    vector<Action> a;
+
+#if defined(Q_OS_MAC)
+    a.emplace_back(u"open"_s, tr("Open trash"),
+                   [=]{ openUrl(u"file://%1/.Trash"_s.arg(QDir::homePath())); });
+    a.emplace_back(u"empty"_s, tr("Empty trash"),
+                   [=]{ runDetachedProcess({u"osascript"_s, u"-e"_s, u"tell application \"Finder\" to empty trash"_s}); });
+#elif defined(Q_OS_UNIX)
+    a.emplace_back(u"open"_s, tr("Open trash"), [=]() { openUrl(u"trash:///"_s); });
+#endif
+
     auto item = StandardItem::make(
-        "trash",
+        u"trash"_s,
         tr("Trash"),
         tr("Your trash folder"),
-        {"xdg:user-trash-full", "qsp:SP_TrashIcon"},
-        {
-#if defined(Q_OS_MAC)
-            {
-                "open", tr("Open trash"),
-                [=](){ openUrl(QString("file://%1/.Trash").arg(QDir::homePath())); }
-            },
-            {
-                "empty", tr("Empty trash"),
-                [=](){ runDetachedProcess({"osascript", "-e", "tell application \"Finder\" to empty trash"}); }
-            }
-#elif defined(Q_OS_UNIX)
-            {
-                "open", tr("Open trash"),
-                [=](){ openUrl(QStringLiteral("trash:///")); }
-            }
-#endif
-        }
+        {u"xdg:user-trash-full"_s, u"qsp:SP_TrashIcon"_s},
+        a
     );
     ii.emplace_back(item, item->text());
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2022-2024 Manuel Schneider
+// Copyright (c) 2022-2025 Manuel Schneider
 
 #include <QKeyEvent>
 #include <QMimeDatabase>
@@ -7,6 +7,7 @@
 #include <QString>
 #include <QPushButton>
 #include "mimefilterdialog.h"
+using namespace Qt::StringLiterals;
 using namespace std;
 
 
@@ -29,7 +30,7 @@ MimeFilterDialog::MimeFilterDialog(const QStringList &filters, QWidget *parent):
         if (mimeType.filterString().isEmpty())
             item->setText(mimeType.name());
         else{
-            item->setText(QString("%1 - %2").arg(mimeType.name(), mimeType.filterString()));
+            item->setText(u"%1 - %2"_s.arg(mimeType.name(), mimeType.filterString()));
             item->setToolTip(mimeType.filterString());
         }
         item->setData(mimeType.name(), Qt::UserRole);
@@ -57,22 +58,22 @@ MimeFilterDialog::MimeFilterDialog(const QStringList &filters, QWidget *parent):
      * mime text edit
      */
 
-    ui.plainTextEdit->setPlainText(filters.join("\n"));
+    ui.plainTextEdit->setPlainText(filters.join(u'\n'));
 
     connect(ui.plainTextEdit, &QPlainTextEdit::textChanged, this, [this](){
-        auto patterns = ui.plainTextEdit->toPlainText().split("\n");
+        auto patterns = ui.plainTextEdit->toPlainText().split(u'\n');
         QStringList errors;
         for (auto &pattern : patterns)
             if (auto re = QRegularExpression::fromWildcard(pattern); !re.isValid())
-                errors << QString("'%1' %2").arg(pattern, re.errorString());
+                errors << u"'%1' %2"_s.arg(pattern, re.errorString());
         ui.buttonBox->button(QDialogButtonBox::Ok)->setEnabled(errors.isEmpty());
-        ui.label_error->setText(errors.join(", "));
+        ui.label_error->setText(errors.join(u", "_s));
     });
 }
 
 QStringList MimeFilterDialog::filters() const
 {
-    return ui.plainTextEdit->toPlainText().split("\n", Qt::SkipEmptyParts);
+    return ui.plainTextEdit->toPlainText().split(u'\n', Qt::SkipEmptyParts);
 }
 
 bool MimeFilterDialog::eventFilter(QObject *watched, QEvent *event)

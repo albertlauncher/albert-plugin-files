@@ -1,4 +1,4 @@
-// Copyright (c) 2022-2023 Manuel Schneider
+// Copyright (c) 2022-2025 Manuel Schneider
 
 #include "fileitems.h"
 #include "fsindexnodes.h"
@@ -13,30 +13,32 @@
 #include <utility>
 #include <vector>
 using namespace std;
-static const char *JK_MIME = "mimetype";
-static const char *JK_NAME = "name";
-static const char *JK_PATH = "path";
-static const char *JK_MDATE = "mdate";
-static const char *JK_CHILDREN = "children";
-static const char *JK_ITEMS = "items";
+using namespace Qt::StringLiterals;
+
+static const auto JK_MIME     = u"mimetype"_s;
+static const auto JK_NAME     = u"name"_s;
+static const auto JK_PATH     = u"path"_s;
+static const auto JK_MDATE    = u"mdate"_s;
+static const auto JK_CHILDREN = u"children"_s;
+static const auto JK_ITEMS    = u"items"_s;
 
 // https://code.qt.io/cgit/qt/qtbase.git/tree/src/corelib/mimetypes/qmimedatabase.cpp?h=dev
 static QMimeDatabase mdb;
-static QMimeType dirmimetype = mdb.mimeTypeForName(QStringLiteral("inode/directory"));
+static QMimeType dirmimetype = mdb.mimeTypeForName(u"inode/directory"_s);
 
 
-NameFilter::NameFilter(QRegularExpression re, PatternType t) : regex(std::move(re)), type(t) {}
+NameFilter::NameFilter(QRegularExpression re, PatternType t) : regex(::move(re)), type(t) {}
 
 NameFilter::NameFilter(const QString &pattern) : regex(pattern), type(PatternType::Exclude) {
-    if (pattern.startsWith('!')){
+    if (pattern.startsWith(u'!')){
         regex = QRegularExpression(pattern.mid(1));
         type = PatternType::Include;
     }
 }
 
 
-DirNode::DirNode(QString name, const std::shared_ptr<DirNode>& parent, uint64_t mdate):
-        parent_(parent), name_(std::move(name)), mdate_(mdate) { name_.shrink_to_fit(); }
+DirNode::DirNode(QString name, const shared_ptr<DirNode>& parent, uint64_t mdate):
+        parent_(parent), name_(::move(name)), mdate_(mdate) { name_.shrink_to_fit(); }
 
 DirNode::~DirNode() = default;
 
@@ -45,7 +47,7 @@ shared_ptr<DirNode> DirNode::make(QString name, const shared_ptr<DirNode>& paren
     return shared_ptr<DirNode>(new DirNode(::move(name), parent, mdate));
 }
 
-shared_ptr<DirNode> DirNode::fromJson(const QJsonObject &json, const std::shared_ptr<DirNode>& parent)
+shared_ptr<DirNode> DirNode::fromJson(const QJsonObject &json, const shared_ptr<DirNode>& parent)
 {
     // need a factory since shared_from_this is not available in ctor
     shared_ptr<DirNode> d(new DirNode(json[JK_NAME].toString(), parent, json[JK_MDATE].toVariant().toULongLong()));
@@ -94,11 +96,11 @@ void DirNode::removeChildren()
     children_.clear();
 }
 
-void DirNode::update(const std::shared_ptr<DirNode>& shared_this,
+void DirNode::update(const shared_ptr<DirNode>& shared_this,
                      const bool &abort,
-                     std::function<void(const QString&)> &status,
+                     function<void(const QString&)> &status,
                      const IndexSettings &settings,
-                     std::set<QString> &indexed_dirs,
+                     set<QString> &indexed_dirs,
                      uint depth)
 {
     if (abort)
@@ -116,7 +118,7 @@ void DirNode::update(const std::shared_ptr<DirNode>& shared_this,
         mdate_ = mdate;
 
         QString absFilePath = fileInfo.absoluteFilePath();
-        status(QString("Indexing %1").arg(fileInfo.filePath()));
+        status(u"Indexing %1"_s.arg(fileInfo.filePath()));
 
         auto filters = QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot;
         if (settings.index_hidden_files)
@@ -124,8 +126,8 @@ void DirNode::update(const std::shared_ptr<DirNode>& shared_this,
 
         auto cit = children_.begin();
         auto iit = items_.begin();
-        for (const auto &fi : QDir(absFilePath).entryInfoList(filters, QDir::Name)) {
-
+        for (const auto &fi : QDir(absFilePath).entryInfoList(filters, QDir::Name))
+        {
             // Erase children and items which do not exists anymore (until this lexicographic point)
             while (cit != children_.end() && (*cit)->name_ < fi.fileName())
                 cit = children_.erase(cit);
@@ -193,11 +195,11 @@ void DirNode::update(const std::shared_ptr<DirNode>& shared_this,
 
 QString DirNode::path() const { return parent_->filePath(); }
 
-QString DirNode::filePath() const { return parent_->filePath().append("/").append(name_); }
+QString DirNode::filePath() const { return parent_->filePath().append(u'/').append(name_); }
 
-QString DirNode::relativeFilePath() const { return parent_->relativeFilePath().append("/").append(name_); }
+QString DirNode::relativeFilePath() const { return parent_->relativeFilePath().append(u'/').append(name_); }
 
-void DirNode::items(std::vector<std::shared_ptr<FileItem>> &result) const
+void DirNode::items(vector<shared_ptr<FileItem>> &result) const
 {
     for (const auto &item : items_)
         result.emplace_back(item);
@@ -205,7 +207,7 @@ void DirNode::items(std::vector<std::shared_ptr<FileItem>> &result) const
         child->items(result);
 }
 
-void DirNode::nodes(std::vector<std::shared_ptr<DirNode>> &result) const
+void DirNode::nodes(vector<shared_ptr<DirNode>> &result) const
 {
     for (const auto &child : children_){
         result.emplace_back(child);
@@ -228,12 +230,12 @@ RootNode::RootNode(QString filePath): DirNode(QFileInfo(filePath).fileName())
 
 RootNode::~RootNode() { removeChildren(); }
 
-std::shared_ptr<RootNode> RootNode::make(QString name)
+shared_ptr<RootNode> RootNode::make(QString name)
 {
     return shared_ptr<RootNode>(new RootNode(name));
 }
 
-std::shared_ptr<RootNode> RootNode::fromJson(const QJsonObject &json)
+shared_ptr<RootNode> RootNode::fromJson(const QJsonObject &json)
 {
     auto n = make(json[JK_NAME].toString());
     n->path_ = json[JK_PATH].toString();
@@ -263,6 +265,6 @@ QJsonObject RootNode::toJson() const
 
 QString RootNode::path() const { return path_; }
 
-QString RootNode::filePath() const { return QString("%1/%2").arg(path_, name_); }
+QString RootNode::filePath() const { return QDir(path_).filePath(name_); }
 
 QString RootNode::relativeFilePath() const { return {}; }

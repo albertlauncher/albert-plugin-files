@@ -1,4 +1,4 @@
-// Copyright (c) 2022-2023 Manuel Schneider
+// Copyright (c) 2022-2025 Manuel Schneider
 
 #include "configwidget.h"
 #include "mimefilterdialog.h"
@@ -10,9 +10,12 @@
 #include <QStandardPaths>
 #include <albert/widgetsutil.h>
 #include <map>
+using namespace Qt::StringLiterals;
+using namespace albert::util;
 using namespace albert;
 using namespace std;
-using namespace util;
+
+static const auto mt_indode_directory = u"inode/directory"_s;
 
 static QStringList getPaths(const map<QString,unique_ptr<FsIndexPath>> &index_paths){
     QStringList paths;
@@ -59,7 +62,7 @@ ConfigWidget::ConfigWidget(Plugin *plu, QWidget *par) : QWidget(par), plugin(plu
     paths_model.setStringList(getPaths(index_paths));
     ui.listView_paths->setModel(&paths_model);
 
-    connect(ui.toolButton_add, &QPushButton::clicked, this, [this]()
+    connect(ui.toolButton_add, &QPushButton::clicked, this, [this]
     {
         QString path = QFileDialog::getExistingDirectory(
                 this,
@@ -160,7 +163,7 @@ ConfigWidget::ConfigWidget(Plugin *plu, QWidget *par) : QWidget(par), plugin(plu
             [this](bool value){
                 if (value)
                     QMessageBox::warning(
-                        this, "Warning",
+                        this, u"Warning"_s,
                         tr("Enabling file system watches comes with caveats. You should only "
                            "activate this option if you know what you are doing. A lot of file "
                            "system changes (compilation, installing, etc) while having watches "
@@ -173,22 +176,23 @@ ConfigWidget::ConfigWidget(Plugin *plu, QWidget *par) : QWidget(par), plugin(plu
         connect(checkbox, &QCheckBox::clicked, this, [this, checkbox, type](bool checked){
             checkbox->setTristate(false);
             auto patterns = plugin->fsIndex().indexPaths().at(current_path)->mimeFilters();
-            patterns = patterns.filter(QRegularExpression(QString(R"(^(?!%1\/))").arg(type))); // drop all of mimetype class
+            patterns = patterns.filter(QRegularExpression(uR"(^(?!%1\/))"_s
+                                                              .arg(type))); // drop all of mimetype class
             if (checked)
-                patterns.push_back(QString("%1/*").arg(type));
+                patterns.push_back(u"%1/*"_s.arg(type));
             plugin->fsIndex().indexPaths().at(current_path)->setMimeFilters(patterns);
         });
     };
-    helper(ui.checkBox_audio, "audio");
-    helper(ui.checkBox_video, "video");
-    helper(ui.checkBox_image, "image");
-    helper(ui.checkBox_docs, "application");
+    helper(ui.checkBox_audio, u"audio"_s);
+    helper(ui.checkBox_video, u"video"_s);
+    helper(ui.checkBox_image, u"image"_s);
+    helper(ui.checkBox_docs, u"application"_s);
 
     connect(ui.checkBox_dirs, &QCheckBox::clicked, this, [this](bool checked){
         auto patterns = plugin->fsIndex().indexPaths().at(current_path)->mimeFilters();
-        patterns.removeAll("inode/directory");
+        patterns.removeAll(mt_indode_directory);
         if (checked)
-            patterns.push_back("inode/directory");
+            patterns.push_back(mt_indode_directory);
         plugin->fsIndex().indexPaths().at(current_path)->setMimeFilters(patterns);
     });
 
@@ -201,15 +205,18 @@ ConfigWidget::ConfigWidget(Plugin *plu, QWidget *par) : QWidget(par), plugin(plu
 void ConfigWidget::adjustMimeCheckboxes()
 {
     auto patterns = plugin->fsIndex().indexPaths().at(current_path)->mimeFilters();
-    ui.checkBox_dirs->setCheckState(patterns.contains("inode/directory") ? Qt::Checked : Qt::Unchecked);
-    map<QCheckBox*,QString> m {
-            {ui.checkBox_audio, "audio/"},
-            {ui.checkBox_video, "video/"},
-            {ui.checkBox_image, "image/"},
-            {ui.checkBox_docs, "application/"}
+    ui.checkBox_dirs->setCheckState(patterns.contains(mt_indode_directory) ? Qt::Checked : Qt::Unchecked);
+
+    initializer_list<pair<QCheckBox*,QString>> m {
+            {ui.checkBox_audio, u"audio/"_s},
+            {ui.checkBox_video, u"video/"_s},
+            {ui.checkBox_image, u"image/"_s},
+            {ui.checkBox_docs, u"application/"_s}
     };
-    for (const auto &[checkbox, mime_prefix] : m){
-        if (patterns.contains(mime_prefix+"*"))
+
+    for (const auto &[checkbox, mime_prefix] : m)
+    {
+        if (patterns.contains(mime_prefix + u'*'))
             checkbox->setCheckState(Qt::Checked);
         else if (any_of(patterns.begin(), patterns.end(),
                         [mp=mime_prefix](const QString & str){ return str.startsWith(mp); }))

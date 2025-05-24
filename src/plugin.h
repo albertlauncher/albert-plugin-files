@@ -1,4 +1,4 @@
-// Copyright (c) 2022-2024 Manuel Schneider
+// Copyright (c) 2022-2025 Manuel Schneider
 
 #pragma once
 #include "filebrowsers.h"
@@ -36,7 +36,7 @@ public:
 
 private:
 
-    albert::StrongDependency<applications::Plugin> apps{"applications"};
+    albert::StrongDependency<applications::Plugin> apps{QStringLiteral("applications")};
     FsIndex fs_index_;
     std::shared_ptr<albert::Item> update_item;
     HomeBrowser homebrowser;
