@@ -7,10 +7,10 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QSettings>
-#include <albert/albert.h>
 #include <albert/extensionregistry.h>
 #include <albert/logging.h>
 #include <albert/standarditem.h>
+#include <albert/systemutil.h>
 ALBERT_LOGGING_CATEGORY("files")
 using namespace Qt::StringLiterals;
 using namespace albert::util;

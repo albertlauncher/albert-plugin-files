@@ -9,9 +9,10 @@
 #include <QMimeData>
 #include <QMimeDatabase>
 #include <QUrl>
-#include <albert/albert.h>
+#include <albert/systemutil.h>
 #include <albert/plugin/applications.h>
 using namespace Qt::StringLiterals;
+using namespace albert::util;
 using namespace albert;
 using namespace std;
 
