@@ -169,7 +169,7 @@ void Plugin::updateIndexItems()
     a.emplace_back(u"empty"_s, tr("Empty trash"),
                    [=]{ runDetachedProcess({u"osascript"_s, u"-e"_s, u"tell application \"Finder\" to empty trash"_s}); });
 #elif defined(Q_OS_UNIX)
-    a.emplace_back(u"open"_s, tr("Open trash"), [=]() { openUrl(u"trash:///"_s); });
+    a.emplace_back(u"open"_s, tr("Open trash"), [=]{ openUrl(u"trash:///"_s); });
 #endif
 
     auto item = StandardItem::make(
@@ -177,7 +177,7 @@ void Plugin::updateIndexItems()
         tr("Trash"),
         tr("Your trash folder"),
         {u"xdg:user-trash-full"_s, u"qsp:SP_TrashIcon"_s},
-        a
+        ::move(a)
     );
     ii.emplace_back(item, item->text());
 

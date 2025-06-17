@@ -11,7 +11,7 @@
 #include <albert/plugindependency.h>
 #include <albert/property.h>
 
-class Plugin : public albert::ExtensionPlugin,
+class Plugin : public albert::util::ExtensionPlugin,
                public albert::util::IndexQueryHandler
 {
     ALBERT_PLUGIN
@@ -36,7 +36,7 @@ public:
 
 private:
 
-    albert::StrongDependency<applications::Plugin> apps{QStringLiteral("applications")};
+    albert::util::StrongDependency<applications::Plugin> apps{QStringLiteral("applications")};
     FsIndex fs_index_;
     std::shared_ptr<albert::Item> update_item;
     HomeBrowser homebrowser;
