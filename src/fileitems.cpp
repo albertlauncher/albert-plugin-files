@@ -37,15 +37,6 @@ QString FileItem::inputActionText() const
 
 QStringList FileItem::iconUrls() const
 {
-    // Optimize directory icons to avoid `stat`ing all the time.
-    // Also solves the "qfip does not work for dir links on macos" issue.
-    static const auto directoryMimeType = QMimeDatabase().mimeTypeForName(u"inode/directory"_s);
-    if (mimeType() == directoryMimeType)
-    {
-        static QStringList urls(u"qsp:SP_DirIcon"_s);
-        return urls;
-    }
-
     QStringList urls;
 #if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
     urls << u"xdg:%1"_s.arg(mimeType().iconName());
