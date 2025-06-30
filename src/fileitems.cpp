@@ -142,7 +142,7 @@ StandardFile::StandardFile(QString path, QMimeType mimetype, QString completion)
 {
     QFileInfo fileInfo(path);
     name_ = fileInfo.fileName();
-    path_ = fileInfo.canonicalPath();
+    path_ = fileInfo.absolutePath();
 }
 
 QString StandardFile::name() const { return name_; }
