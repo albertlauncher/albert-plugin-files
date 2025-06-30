@@ -161,13 +161,16 @@ void Plugin::updateIndexItems()
     // Add update item
     ii.emplace_back(update_item, update_item->text());
 
-    vector<Action> a;
+    const auto *c_trash_title = QT_TR_NOOP("Trash");
+    const auto q_trash_title = QString::fromUtf8(c_trash_title);
+    const auto t_trash_title = tr(c_trash_title);
 
+    vector<Action> a;
 #if defined(Q_OS_MAC)
     a.emplace_back(u"open"_s, tr("Open trash"),
                    [=]{ openUrl(u"file://%1/.Trash"_s.arg(QDir::homePath())); });
     a.emplace_back(u"empty"_s, tr("Empty trash"),
-                   [=]{ runDetachedProcess({u"osascript"_s, u"-e"_s, u"tell application \"Finder\" to empty trash"_s}); });
+                   [=]{ runAppleScript(u"tell application \"Finder\" to empty trash"_s); });
 #elif defined(Q_OS_UNIX)
     a.emplace_back(u"open"_s, tr("Open trash"), [=]{ openUrl(u"trash:///"_s); });
 #endif
@@ -179,7 +182,9 @@ void Plugin::updateIndexItems()
         {u"xdg:user-trash-full"_s, u"qsp:SP_TrashIcon"_s},
         ::move(a)
     );
-    ii.emplace_back(item, item->text());
+
+    ii.emplace_back(item, q_trash_title);
+    ii.emplace_back(item, t_trash_title);
 
     setIndexItems(::move(ii));
 }
