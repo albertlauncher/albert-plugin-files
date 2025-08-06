@@ -169,8 +169,15 @@ void Plugin::updateIndexItems()
 #if defined(Q_OS_MAC)
     a.emplace_back(u"open"_s, tr("Open trash"),
                    [=]{ openUrl(u"file://%1/.Trash"_s.arg(QDir::homePath())); });
-    a.emplace_back(u"empty"_s, tr("Empty trash"),
-                   [=]{ runAppleScript(u"tell application \"Finder\" to empty trash"_s); });
+    a.emplace_back(
+        u"empty"_s, tr("Empty trash"),
+        [=]{
+            try {
+                runAppleScript(uR"(tell application "Finder" to empty trash)"_s);
+            } catch (const std::runtime_error &e) {
+                WARN << e.what();
+            }
+        });
 #elif defined(Q_OS_UNIX)
     a.emplace_back(u"open"_s, tr("Open trash"), [=]{ openUrl(u"trash:///"_s); });
 #endif
