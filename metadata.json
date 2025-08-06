@@ -3,6 +3,7 @@
     "description": "File search",
     "description[de]": "Dateisuche",
     "license": "ALL",
+    "maintainers": ["@manuelschneid3r"],
     "name": "Files",
     "name[de]": "Dateien",
     "plugin_dependencies": ["applications"],
