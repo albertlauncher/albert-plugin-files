@@ -7,5 +7,5 @@
     "name": "Files",
     "name[de]": "Dateien",
     "plugin_dependencies": ["applications"],
-    "url": "https://github.com/albertlauncher/albert-plugin-files",
+    "url": "https://github.com/albertlauncher/albert-plugin-files"
 }
