@@ -1,1 +1,1 @@
-# albert-plugin-files
+# Albert plugin: Files
