@@ -8,6 +8,7 @@
 #include <QJsonObject>
 #include <QSettings>
 #include <albert/extensionregistry.h>
+#include <albert/iconutil.h>
 #include <albert/logging.h>
 #include <albert/standarditem.h>
 #include <albert/systemutil.h>
@@ -100,7 +101,7 @@ Plugin::Plugin():
         u"scan_files"_s,
         tr("Update index"),
         tr("Update the file index"),
-        {u":app_icon"_s},
+        []{ return  makeThemeIcon(u"albert"_s); },
         {{u"scan_files"_s, tr("Scan"), [this]{ fs_index_.update(); }}}
     );
 }
@@ -186,7 +187,7 @@ void Plugin::updateIndexItems()
         u"trash"_s,
         tr("Trash"),
         tr("Your trash folder"),
-        {u"xdg:user-trash-full"_s, u"qsp:SP_TrashIcon"_s},
+        []{ return  makeStandardIcon(TrashIcon); },
         ::move(a)
     );
 

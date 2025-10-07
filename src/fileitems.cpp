@@ -9,8 +9,9 @@
 #include <QMimeData>
 #include <QMimeDatabase>
 #include <QUrl>
-#include <albert/systemutil.h>
+#include <albert/iconutil.h>
 #include <albert/plugin/applications.h>
+#include <albert/systemutil.h>
 using namespace Qt::StringLiterals;
 using namespace albert::util;
 using namespace albert;
@@ -24,6 +25,15 @@ QString FileItem::text() const { return name(); }
 
 QString FileItem::subtext() const { return filePath(); }
 
+unique_ptr<Icon> FileItem::icon() const
+{
+#ifdef Q_OS_MAC
+    return makeFileTypeIcon(filePath());
+#elifdef Q_OS_UNIX
+    return makeThemeIcon(mimeType().iconName());
+#endif
+}
+
 QString FileItem::inputActionText() const
 {
     const QString &path = filePath();
@@ -33,17 +43,6 @@ QString FileItem::inputActionText() const
         result.replace(QDir::homePath(), u"~"_s);
 #endif
     return result;
-}
-
-QStringList FileItem::iconUrls() const
-{
-    QStringList urls;
-#if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
-    urls << u"xdg:%1"_s.arg(mimeType().iconName());
-    urls << u"xdg:%1"_s.arg(mimeType().genericIconName());
-#endif
-    urls << u"qfip:%1"_s.arg(filePath());
-    return urls;
 }
 
 vector<Action> FileItem::actions() const
