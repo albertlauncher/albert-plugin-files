@@ -11,7 +11,6 @@
 #include <albert/widgetsutil.h>
 #include <map>
 using namespace Qt::StringLiterals;
-using namespace albert::util;
 using namespace albert;
 using namespace std;
 
@@ -28,35 +27,30 @@ ConfigWidget::ConfigWidget(Plugin *plu, QWidget *par) : QWidget(par), plugin(plu
 {
     ui.setupUi(this);
 
-    bind(ui.matchCaseSensitiveCheckBox,
-         plugin,
-         &Plugin::fs_browsers_match_case_sensitive,
-         &Plugin::set_fs_browsers_match_case_sensitive,
-         &Plugin::fs_browsers_match_case_sensitive_changed);
+    bindWidget(ui.matchCaseSensitiveCheckBox,
+               plugin,
+               &Plugin::fsBrowsersMatchCaseSensitive,
+               &Plugin::setFsBrowsersMatchCaseSensitive);
 
-    bind(ui.showHiddenFilesCheckBox,
-         plugin,
-         &Plugin::fs_browsers_show_hidden,
-         &Plugin::set_fs_browsers_show_hidden,
-         &Plugin::fs_browsers_show_hidden_changed);
+    bindWidget(ui.showHiddenFilesCheckBox,
+               plugin,
+               &Plugin::fsBrowsersShowHidden,
+               &Plugin::setFsBrowsersShowHidden);
 
-    bind(ui.sortCaseInsensitveCheckBox,
-         plugin,
-         &Plugin::fs_browsers_sort_case_insensitive,
-         &Plugin::set_fs_browsers_sort_case_insensitive,
-         &Plugin::fs_browsers_sort_case_insensitive_changed);
+    bindWidget(ui.sortCaseInsensitveCheckBox,
+               plugin,
+               &Plugin::fsBrowsersSortCaseInsensitive,
+               &Plugin::setFsBrowsersSortCaseInsensitive);
 
-    bind(ui.showDirsFirstCheckBox,
-         plugin,
-         &Plugin::fs_browsers_show_dirs_first,
-         &Plugin::set_fs_browsers_show_dirs_first,
-         &Plugin::fs_browsers_show_dirs_first_changed);
+    bindWidget(ui.showDirsFirstCheckBox,
+               plugin,
+               &Plugin::fsBrowsersShowDirsFirst,
+               &Plugin::setFsBrowsersShowDirsFirst);
 
-    bind(ui.indexFilePathCheckBox,
-         plugin,
-         &Plugin::index_file_path,
-         &Plugin::set_index_file_path,
-         &Plugin::index_file_path_changed);
+    bindWidget(ui.indexFilePathCheckBox,
+               plugin,
+               &Plugin::indexFilePath,
+               &Plugin::setIndexFilePath);
 
     auto &index_paths = plu->fsIndex().indexPaths();
     paths_model.setStringList(getPaths(index_paths));

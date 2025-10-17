@@ -2,10 +2,12 @@ cmake_minimum_required(VERSION 3.16)
 project(files VERSION 11.9.1)
 
 find_package(Albert REQUIRED)
+find_package(QCoro6 REQUIRED COMPONENTS Coro)
 
 albert_plugin(
     INCLUDE PRIVATE $<TARGET_PROPERTY:albert::applications,INTERFACE_INCLUDE_DIRECTORIES>
     QT Concurrent Widgets
+    LINK PRIVATE QCoro6::Coro
 )
 
 if (BUILD_TESTS)

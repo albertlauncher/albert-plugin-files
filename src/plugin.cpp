@@ -14,7 +14,6 @@
 #include <albert/systemutil.h>
 ALBERT_LOGGING_CATEGORY("files")
 using namespace Qt::StringLiterals;
-using namespace albert::util;
 using namespace albert;
 using namespace std;
 
@@ -41,6 +40,13 @@ static const auto DEF_MAX_DEPTH       = 255u;
 static const auto CFG_SCAN_INTERVAL   = u"scanInterval"_s;
 static const auto DEF_SCAN_INTERVAL   = 5;
 static const auto INDEX_FILE_NAME     = "file_index.json";
+
+static const auto ck_index_file_path                   = "index_file_path";
+static const auto ck_fs_browsers_match_case_sensitive  = "fs_browsers_match_case_sensitive";
+static const auto ck_fs_browsers_show_hidden           = "fs_browsers_show_hidden";
+static const auto ck_fs_browsers_sort_case_insensitive = "fs_browsers_sort_case_insensitive";
+static const auto ck_fs_browsers_show_dirs_first       = "fs_browsers_show_dirs_first";
+
 }
 
 applications::Plugin *apps;
@@ -59,10 +65,9 @@ Plugin::Plugin():
 
     connect(&fs_index_, &FsIndex::status, this, &Plugin::statusInfo);
     connect(&fs_index_, &FsIndex::updatedFinished, this, &Plugin::updateIndexItems);
-    connect(this, &Plugin::index_file_path_changed, this, &Plugin::updateIndexItems);
 
     auto cache_path = cacheLocation();
-    tryCreateDirectory(cache_path);
+    filesystem::create_directories(cache_path);
 
     QJsonObject object;
     if (QFile file(cache_path / INDEX_FILE_NAME);
@@ -70,11 +75,11 @@ Plugin::Plugin():
         object = QJsonDocument(QJsonDocument::fromJson(file.readAll())).object();
 
     auto s = settings();
-    restore_index_file_path(s);
-    restore_fs_browsers_match_case_sensitive(s);
-    restore_fs_browsers_show_hidden(s);
-    restore_fs_browsers_sort_case_insensitive(s);
-    restore_fs_browsers_show_dirs_first(s);
+    index_file_path_                   = s->value(ck_index_file_path, false).value<bool>();
+    fs_browsers_match_case_sensitive_  = s->value(ck_fs_browsers_match_case_sensitive, true).value<bool>();
+    fs_browsers_show_hidden_           = s->value(ck_fs_browsers_show_hidden, true).value<bool>();
+    fs_browsers_sort_case_insensitive_ = s->value(ck_fs_browsers_sort_case_insensitive, true).value<bool>();
+    fs_browsers_show_dirs_first_       = s->value(ck_fs_browsers_show_dirs_first, true).value<bool>();
 
     const auto paths = s->value(CFG_PATHS, QStringList()).toStringList();
 
@@ -154,7 +159,7 @@ void Plugin::updateIndexItems()
         for (auto &file_item : items)
         {
             ii.emplace_back(file_item, file_item->name());
-            if (index_file_path())
+            if (index_file_path_)
                 ii.emplace_back(file_item, file_item->filePath());
         }
     }
@@ -218,4 +223,60 @@ void Plugin::removePath(const QString &path)
 {
     fs_index_.removePath(path);
     updateIndexItems();
+}
+
+bool Plugin::indexFilePath() const { return index_file_path_; }
+
+void Plugin::setIndexFilePath(bool v)
+{
+    if (index_file_path_ != v)
+    {
+        settings()->setValue(ck_index_file_path, index_file_path_);
+        index_file_path_ = v;
+        updateIndexItems();
+    }
+}
+
+bool Plugin::fsBrowsersMatchCaseSensitive() const { return fs_browsers_match_case_sensitive_; }
+
+void Plugin::setFsBrowsersMatchCaseSensitive(bool v)
+{
+    if (fs_browsers_match_case_sensitive_ != v)
+    {
+        settings()->setValue(ck_fs_browsers_match_case_sensitive, fs_browsers_match_case_sensitive_);
+        fs_browsers_match_case_sensitive_ = v;
+    }
+}
+
+bool Plugin::fsBrowsersShowHidden() const { return fs_browsers_show_hidden_; }
+
+void Plugin::setFsBrowsersShowHidden(bool v)
+{
+    if (fs_browsers_show_hidden_ != v)
+    {
+        settings()->setValue(ck_fs_browsers_show_hidden, fs_browsers_show_hidden_);
+        fs_browsers_show_hidden_ = v;
+    }
+}
+
+bool Plugin::fsBrowsersSortCaseInsensitive() const { return fs_browsers_sort_case_insensitive_; }
+
+void Plugin::setFsBrowsersSortCaseInsensitive(bool v)
+{
+    if (fs_browsers_sort_case_insensitive_ != v)
+    {
+        settings()->setValue(ck_fs_browsers_sort_case_insensitive, fs_browsers_sort_case_insensitive_);
+        fs_browsers_sort_case_insensitive_ = v;
+    }
+}
+
+bool Plugin::fsBrowsersShowDirsFirst() const { return fs_browsers_show_dirs_first_; }
+
+void Plugin::setFsBrowsersShowDirsFirst(bool v)
+{
+    if (fs_browsers_show_dirs_first_ != v)
+    {
+        settings()->setValue(ck_fs_browsers_show_dirs_first, fs_browsers_show_dirs_first_);
+        fs_browsers_show_dirs_first_ = v;
+    }
 }

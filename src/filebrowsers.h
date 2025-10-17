@@ -3,9 +3,9 @@
 #pragma once
 #include <QCoreApplication>
 #include <QFileInfoList>
-#include <albert/triggerqueryhandler.h>
+#include <albert/generatorqueryhandler.h>
 
-class FilePathBrowser : public albert::TriggerQueryHandler
+class FilePathBrowser : public albert::GeneratorQueryHandler
 {
 public:
 
@@ -36,7 +36,7 @@ public:
     QString name() const override;
     QString description() const override;
     QString defaultTrigger() const override;
-    void handleTriggerQuery(albert::Query &) override;
+    albert::ItemGenerator items(albert::QueryContext &) override;
 };
 
 class HomeBrowser : public FilePathBrowser
@@ -49,5 +49,5 @@ public:
     QString name() const override;
     QString description() const override;
     QString defaultTrigger() const override;
-    void handleTriggerQuery(albert::Query &) override;
+    albert::ItemGenerator items(albert::QueryContext &) override;
 };

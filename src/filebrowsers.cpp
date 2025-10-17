@@ -2,13 +2,12 @@
 
 #include "filebrowsers.h"
 #include "fileitems.h"
-#include <albert/logging.h>
 #include <QCoreApplication>
+#include <QCoroGenerator>
 #include <QDir>
 #include <QDirIterator>
 #include <QFileInfo>
 #include <QMimeDatabase>
-#include <QFileInfo>
 using namespace Qt::StringLiterals;
 using namespace albert;
 using namespace std;
@@ -67,11 +66,11 @@ QString RootBrowser::description() const { return tr("Browse root directory by p
 
 QString RootBrowser::defaultTrigger() const { return u"/"_s; }
 
-void RootBrowser::handleTriggerQuery(Query &query)
+ItemGenerator RootBrowser::items(QueryContext &ctx)
 {
     vector<shared_ptr<Item>> results;
     QMimeDatabase mimeDatabase;
-    const auto file_infos = listFiles(defaultTrigger() + query.string());
+    const auto file_infos = listFiles(defaultTrigger() + ctx.query());
     for (const auto &fi : file_infos)
     {
         const auto mimetype = mimeDatabase.mimeTypeForFile(fi);
@@ -82,7 +81,7 @@ void RootBrowser::handleTriggerQuery(Query &query)
         results.emplace_back(make_shared<StandardFile>(fi.filePath(), mimetype, completion));
     }
 
-    query.add(::move(results));
+    co_yield results;
 }
 
 
@@ -101,12 +100,12 @@ QString HomeBrowser::description() const { return tr("Browse home directory by p
 
 QString HomeBrowser::defaultTrigger() const { return u"~"_s; }
 
-void HomeBrowser::handleTriggerQuery(Query &query)
+ItemGenerator HomeBrowser::items(QueryContext &ctx)
 {
     vector<shared_ptr<Item>> results;
     QMimeDatabase mimeDatabase;
     const auto home_length = QDir::homePath().size();
-    const auto file_infos = listFiles(QDir::homePath() + query.string());
+    const auto file_infos = listFiles(QDir::homePath() + ctx.query());
     for (const auto &fi : file_infos)
     {
         const auto mimetype = mimeDatabase.mimeTypeForFile(fi);
@@ -117,7 +116,7 @@ void HomeBrowser::handleTriggerQuery(Query &query)
         results.emplace_back(make_shared<StandardFile>(fi.filePath(), mimetype, completion));
     }
 
-    query.add(::move(results));
+    co_yield results;
 }
 
 
