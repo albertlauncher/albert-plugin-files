@@ -9,7 +9,7 @@
 using namespace std;
 
 
-QTEST_APPLESS_MAIN(FilesTests)
+QTEST_MAIN(FilesTests)
 
 
 void FilesTests::fs_index_path()
