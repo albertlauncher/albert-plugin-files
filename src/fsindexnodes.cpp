@@ -9,11 +9,12 @@
 #include <QRegularExpression>
 #include <QString>
 #include <memory>
+#include <ranges>
 #include <set>
 #include <utility>
 #include <vector>
-using namespace std;
 using namespace Qt::StringLiterals;
+using namespace std;
 
 static const auto JK_MIME     = u"mimetype"_s;
 static const auto JK_NAME     = u"name"_s;
@@ -160,10 +161,10 @@ void DirNode::update(const shared_ptr<DirNode>& shared_this,
 
             // Items
             auto mime_type = mdb.mimeTypeForFile(fi);
-            exclude = none_of(settings.mime_filters.begin(), settings.mime_filters.end(),
-                               [mt = mime_type.name()](const QRegularExpression &re) {
-                                   return re.match(mt).hasMatch();
-                               }) || exclude || settings.max_depth < depth;
+            exclude = ranges::none_of(settings.mime_filters,
+                                      [mt = mime_type.name()](const auto &re) {
+                                          return re.match(mt).hasMatch();
+                                      }) || exclude || settings.max_depth < depth;
             if (iit != items_.end() && (*iit)->name() == fi.fileName()) {  // _is_ already indexed
                 if (exclude)
                     iit = items_.erase(iit);

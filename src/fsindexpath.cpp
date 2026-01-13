@@ -6,6 +6,7 @@
 #include <QFileInfo>
 #include <QJsonObject>
 #include <albert/logging.h>
+#include <ranges>
 using namespace std;
 
 FsIndexPath::FsIndexPath(const QString &path) : root_(RootNode::make(path))
@@ -20,8 +21,6 @@ FsIndexPath::FsIndexPath(const QString &path) : root_(RootNode::make(path))
         WARN << "Root path does not exist:" << fi.absolutePath();
     else if (!fi.isDir())
         WARN << "Root path is not a directory:" << fi.absolutePath();
-
-    self = make_shared<StandardFile>(root_->filePath(), DirNode::dirMimeType());
 }
 
 FsIndexPath::~FsIndexPath() = default;
@@ -50,8 +49,17 @@ void FsIndexPath::update(const bool &abort, function<void(const QString &)> stat
     s.follow_symlinks = follow_symlinks;
     s.max_depth = max_depth;
     s.forced = force_update;
-    set<QString> indexed_dirs;
 
+    // Name filters make no sense here relative path is empty
+    if (ranges::any_of(s.mime_filters,
+                       [mt = DirNode::dirMimeType().name()](const auto &re)
+                       { return re.match(mt).hasMatch();}))
+        self = make_shared<StandardFile>(root_->filePath(), DirNode::dirMimeType());
+    else
+        self.reset();
+
+
+    set<QString> indexed_dirs;
     root_->update(root_, abort, status, s, indexed_dirs, 1);
 
     status(tr("Indexed %n directories in %1.", nullptr, indexed_dirs.size()).arg(path()));
@@ -62,7 +70,8 @@ void FsIndexPath::update(const bool &abort, function<void(const QString &)> stat
 
 void FsIndexPath::items(vector<shared_ptr<FileItem>> &items) const
 {
-    items.emplace_back(self);
+    if (self)
+        items.emplace_back(self);
     root_->items(items);
 }
 
