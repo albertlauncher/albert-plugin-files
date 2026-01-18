@@ -7,7 +7,6 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QSettings>
-#include <albert/extensionregistry.h>
 #include <albert/iconutil.h>
 #include <albert/logging.h>
 #include <albert/standarditem.h>
