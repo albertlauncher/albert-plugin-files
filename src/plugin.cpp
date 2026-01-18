@@ -7,7 +7,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QSettings>
-#include <albert/iconutil.h>
+#include <albert/icon.h>
 #include <albert/logging.h>
 #include <albert/standarditem.h>
 #include <albert/systemutil.h>
@@ -105,7 +105,7 @@ Plugin::Plugin():
         u"scan_files"_s,
         tr("Update index"),
         tr("Update the file index"),
-        []{ return  makeThemeIcon(u"albert"_s); },
+        []{ return  Icon::theme(u"albert"_s); },
         {{u"scan_files"_s, tr("Scan"), [this]{ fs_index_.update(); }}}
     );
 }
@@ -191,7 +191,7 @@ void Plugin::updateIndexItems()
         u"trash"_s,
         tr("Trash"),
         tr("Your trash folder"),
-        []{ return  makeStandardIcon(TrashIcon); },
+        []{ return Icon::standard(Icon::TrashIcon); },
         ::move(a)
     );
 

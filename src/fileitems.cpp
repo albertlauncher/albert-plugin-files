@@ -9,7 +9,7 @@
 #include <QMimeData>
 #include <QMimeDatabase>
 #include <QUrl>
-#include <albert/iconutil.h>
+#include <albert/icon.h>
 #include <albert/plugin/applications.h>
 #include <albert/systemutil.h>
 using namespace Qt::StringLiterals;
@@ -27,9 +27,9 @@ QString FileItem::subtext() const { return filePath(); }
 unique_ptr<Icon> FileItem::icon() const
 {
 #ifdef Q_OS_MAC
-    return makeFileTypeIcon(filePath());
+    return Icon::fileType(filePath());
 #elifdef Q_OS_UNIX
-    return makeThemeIcon(mimeType().iconName());
+    return Icon::theme(mimeType().iconName());
 #endif
 }
 
