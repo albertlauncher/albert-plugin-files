@@ -75,7 +75,7 @@ Plugin::Plugin():
 
     auto s = settings();
     index_file_path_                   = s->value(ck_index_file_path, false).value<bool>();
-    fs_browsers_match_case_sensitive_  = s->value(ck_fs_browsers_match_case_sensitive, true).value<bool>();
+    fs_browsers_match_case_sensitive_  = s->value(ck_fs_browsers_match_case_sensitive, false).value<bool>();
     fs_browsers_show_hidden_           = s->value(ck_fs_browsers_show_hidden, true).value<bool>();
     fs_browsers_sort_case_insensitive_ = s->value(ck_fs_browsers_sort_case_insensitive, true).value<bool>();
     fs_browsers_show_dirs_first_       = s->value(ck_fs_browsers_show_dirs_first, true).value<bool>();
