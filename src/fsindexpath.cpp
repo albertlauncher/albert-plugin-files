@@ -1,4 +1,4 @@
-// Copyright (c) 2022-2025 Manuel Schneider
+// Copyright (c) 2022-2026 Manuel Schneider
 
 #include "fileitems.h"
 #include "fsindexnodes.h"
@@ -7,6 +7,7 @@
 #include <QJsonObject>
 #include <albert/logging.h>
 #include <ranges>
+using namespace Qt::StringLiterals;
 using namespace std;
 
 FsIndexPath::FsIndexPath(const QString &path) : root_(RootNode::make(path))
@@ -52,9 +53,9 @@ void FsIndexPath::update(const bool &abort, function<void(const QString &)> stat
 
     // Name filters make no sense here relative path is empty
     if (ranges::any_of(s.mime_filters,
-                       [mt = DirNode::dirMimeType().name()](const auto &re)
-                       { return re.match(mt).hasMatch();}))
-        self = make_shared<StandardFile>(root_->filePath(), DirNode::dirMimeType());
+                       [](const auto &re)
+                       { return re.match(u"inode/directory"_s).hasMatch();}))
+        self = make_shared<StandardFile>(root_->filePath(), u"inode/directory"_s);
     else
         self.reset();
 

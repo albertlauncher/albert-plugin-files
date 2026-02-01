@@ -216,8 +216,6 @@ void DirNode::nodes(vector<shared_ptr<DirNode>> &result) const
     }
 }
 
-QMimeType DirNode::dirMimeType() {return dirmimetype; }
-
 
 RootNode::RootNode(QString filePath): DirNode(QFileInfo(filePath).fileName())
 {

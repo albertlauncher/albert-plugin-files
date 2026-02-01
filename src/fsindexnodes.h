@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Manuel Schneider
+// Copyright (c) 2022-2026 Manuel Schneider
 
 #pragma once
 #include <QFileSystemWatcher>
@@ -6,12 +6,8 @@
 #include <QRegularExpression>
 #include <QTimer>
 #include <set>
-
 class IndexFileItem;
 class FileItem;
-class QMimeType;
-
-
 enum class PatternType { Include, Exclude };
 
 
@@ -64,8 +60,6 @@ public:
     void items(std::vector<std::shared_ptr<FileItem>>&) const;
     void nodes(std::vector<std::shared_ptr<DirNode>>&) const;
     std::shared_ptr<DirNode> node(const QString &relative_path) const;
-
-    static QMimeType dirMimeType();
 
 protected:
     DirNode(QString name, const std::shared_ptr<DirNode>& parent = nullptr, uint64_t mdate = 0);
