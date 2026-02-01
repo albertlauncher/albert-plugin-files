@@ -1,4 +1,4 @@
-// Copyright (c) 2022-2025 Manuel Schneider
+// Copyright (c) 2022-2026 Manuel Schneider
 
 #include "fileitems.h"
 #include "fsindexnodes.h"
@@ -7,7 +7,6 @@
 #include <QFileInfo>
 #include <QGuiApplication>
 #include <QMimeData>
-#include <QMimeDatabase>
 #include <QUrl>
 #include <albert/icon.h>
 #include <albert/plugin/applications.h>
@@ -24,14 +23,7 @@ QString FileItem::text() const { return name(); }
 
 QString FileItem::subtext() const { return filePath(); }
 
-unique_ptr<Icon> FileItem::icon() const
-{
-#ifdef Q_OS_MAC
-    return Icon::fileType(filePath());
-#elifdef Q_OS_UNIX
-    return Icon::theme(mimeType().iconName());
-#endif
-}
+unique_ptr<Icon> FileItem::icon() const { return Icon::fileType(filePath()); }
 
 QString FileItem::inputActionText() const
 {
@@ -114,8 +106,8 @@ vector<Action> FileItem::actions() const
 }
 
 
-IndexFileItem::IndexFileItem(const QString &name, const QMimeType &mime, const shared_ptr<DirNode> &parent):
-        name_(name), mimetype_(mime), parent_(parent) {}
+IndexFileItem::IndexFileItem(const QString &name, const shared_ptr<DirNode> &parent):
+        name_(name), parent_(parent) {}
 
 QString IndexFileItem::name() const { return name_; }
 
@@ -123,11 +115,8 @@ QString IndexFileItem::path() const { return parent_->filePath(); }
 
 QString IndexFileItem::filePath() const { return u"%1/%2"_s.arg(parent_->filePath(), name_); }
 
-const QMimeType &IndexFileItem::mimeType() const { return mimetype_; }
-
-StandardFile::StandardFile(QString path, QMimeType mimetype, QString completion) :
-    completion_(::move(completion)),
-    mimetype_(::move(mimetype))
+StandardFile::StandardFile(QString path, QString completion) :
+    completion_(::move(completion))
 {
     QFileInfo fileInfo(path);
     name_ = fileInfo.fileName();
@@ -139,8 +128,6 @@ QString StandardFile::name() const { return name_; }
 QString StandardFile::path() const { return path_; }
 
 QString StandardFile::filePath() const { return QDir(path_).filePath(name_); }
-
-const QMimeType &StandardFile::mimeType() const { return mimetype_; }
 
 QString StandardFile::inputActionText() const
 { return completion_.isEmpty() ? FileItem::inputActionText() : completion_; }

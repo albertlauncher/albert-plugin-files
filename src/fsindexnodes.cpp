@@ -1,4 +1,4 @@
-// Copyright (c) 2022-2025 Manuel Schneider
+// Copyright (c) 2022-2026 Manuel Schneider
 
 #include "fileitems.h"
 #include "fsindexnodes.h"
@@ -16,17 +16,11 @@
 using namespace Qt::StringLiterals;
 using namespace std;
 
-static const auto JK_MIME     = u"mimetype"_s;
 static const auto JK_NAME     = u"name"_s;
 static const auto JK_PATH     = u"path"_s;
 static const auto JK_MDATE    = u"mdate"_s;
 static const auto JK_CHILDREN = u"children"_s;
 static const auto JK_ITEMS    = u"items"_s;
-
-// https://code.qt.io/cgit/qt/qtbase.git/tree/src/corelib/mimetypes/qmimedatabase.cpp?h=dev
-static QMimeDatabase mdb;
-static QMimeType dirmimetype = mdb.mimeTypeForName(u"inode/directory"_s);
-
 
 NameFilter::NameFilter(QRegularExpression re, PatternType t) : regex(::move(re)), type(t) {}
 
@@ -58,8 +52,7 @@ shared_ptr<DirNode> DirNode::fromJson(const QJsonObject &json, const shared_ptr<
 
     for (const auto &json_value : json[JK_ITEMS].toArray()){
         auto json_item = json_value.toObject();
-        d->items_.emplace_back(make_shared<IndexFileItem>(json_item[JK_NAME].toString(),
-                                                          mdb.mimeTypeForName(json_item[JK_MIME].toString()), d));
+        d->items_.emplace_back(make_shared<IndexFileItem>(json_item[JK_NAME].toString(), d));
     }
 
     d->children_.shrink_to_fit();
@@ -82,7 +75,6 @@ QJsonObject DirNode::toJson() const
     for (const auto &item : items_){
         QJsonObject json_item;
         json_item.insert(JK_NAME, item->name());
-        json_item.insert(JK_MIME, item->mimeType().name());
         json_items.push_back(json_item);
     }
     json.insert(JK_ITEMS, json_items);
@@ -160,6 +152,7 @@ void DirNode::update(const shared_ptr<DirNode>& shared_this,
             }
 
             // Items
+            static QMimeDatabase mdb;
             auto mime_type = mdb.mimeTypeForFile(fi);
             exclude = ranges::none_of(settings.mime_filters,
                                       [mt = mime_type.name()](const auto &re) {
@@ -171,7 +164,7 @@ void DirNode::update(const shared_ptr<DirNode>& shared_this,
                 else ++iit;
             } else {  // is _not_ indexed yet
                 if (!(exclude)) {
-                    iit = items_.emplace(iit, make_shared<IndexFileItem>(fi.fileName(), mime_type, shared_this));
+                    iit = items_.emplace(iit, make_shared<IndexFileItem>(fi.fileName(), shared_this));
                     ++iit;
                 }
             }
@@ -245,8 +238,7 @@ shared_ptr<RootNode> RootNode::fromJson(const QJsonObject &json)
 
     for (const auto &json_value : json[JK_ITEMS].toArray()){
         auto json_item = json_value.toObject();
-        n->items_.emplace_back(make_shared<IndexFileItem>(json_item[JK_NAME].toString(),
-                                                          mdb.mimeTypeForName(json_item[JK_MIME].toString()), n));
+        n->items_.emplace_back(make_shared<IndexFileItem>(json_item[JK_NAME].toString(), n));
     }
 
     n->path_.shrink_to_fit();

@@ -1,13 +1,11 @@
-// Copyright (c) 2022-2025 Manuel Schneider
+// Copyright (c) 2022-2026 Manuel Schneider
 
 #include "filebrowsers.h"
 #include "fileitems.h"
-#include <QCoreApplication>
 #include <QCoroGenerator>
 #include <QDir>
 #include <QDirIterator>
 #include <QFileInfo>
-#include <QMimeDatabase>
 using namespace Qt::StringLiterals;
 using namespace albert;
 using namespace std;
@@ -69,16 +67,14 @@ QString RootBrowser::defaultTrigger() const { return u"/"_s; }
 ItemGenerator RootBrowser::items(QueryContext &ctx)
 {
     vector<shared_ptr<Item>> results;
-    QMimeDatabase mimeDatabase;
     const auto file_infos = listFiles(defaultTrigger() + ctx.query());
     for (const auto &fi : file_infos)
     {
-        const auto mimetype = mimeDatabase.mimeTypeForFile(fi);
         auto completion = fi.filePath().mid(1);
         if (fi.isDir())
             completion.append(QDir::separator());
 
-        results.emplace_back(make_shared<StandardFile>(fi.filePath(), mimetype, completion));
+        results.emplace_back(make_shared<StandardFile>(fi.filePath(), completion));
     }
 
     co_yield results;
@@ -103,17 +99,15 @@ QString HomeBrowser::defaultTrigger() const { return u"~"_s; }
 ItemGenerator HomeBrowser::items(QueryContext &ctx)
 {
     vector<shared_ptr<Item>> results;
-    QMimeDatabase mimeDatabase;
     const auto home_length = QDir::homePath().size();
     const auto file_infos = listFiles(QDir::homePath() + ctx.query());
     for (const auto &fi : file_infos)
     {
-        const auto mimetype = mimeDatabase.mimeTypeForFile(fi);
         auto completion = fi.filePath().mid(home_length);
         if (fi.isDir())
             completion.append(QDir::separator());
 
-        results.emplace_back(make_shared<StandardFile>(fi.filePath(), mimetype, completion));
+        results.emplace_back(make_shared<StandardFile>(fi.filePath(), completion));
     }
 
     co_yield results;

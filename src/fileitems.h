@@ -1,7 +1,6 @@
-// Copyright (c) 2022-2024 Manuel Schneider
+// Copyright (c) 2022-2026 Manuel Schneider
 
 #pragma once
-#include <QMimeType>
 #include <albert/item.h>
 class DirNode;
 
@@ -12,7 +11,6 @@ public:
     virtual QString name() const = 0;
     virtual QString path() const = 0;
     virtual QString filePath() const = 0;
-    virtual const QMimeType &mimeType() const = 0;
     QString id() const override;
     QString text() const override;
     QString subtext() const override;
@@ -25,14 +23,12 @@ public:
 class IndexFileItem : public FileItem
 {
 public:
-    explicit IndexFileItem(const QString &name, const QMimeType &mime, const std::shared_ptr<DirNode> &parent);
+    explicit IndexFileItem(const QString &name, const std::shared_ptr<DirNode> &parent);
     QString name() const override;
     QString path() const override;
     QString filePath() const override;
-    const QMimeType &mimeType() const override;
 private:
     const QString name_;
-    const QMimeType mimetype_;
     const std::shared_ptr<DirNode> parent_;
 };
 
@@ -40,16 +36,14 @@ private:
 class StandardFile : public FileItem
 {
 public:
-    StandardFile(QString filePath, QMimeType mimetype, QString completion = {});
+    StandardFile(QString filePath, QString completion = {});
     QString name() const override;
     QString path() const override;
     QString filePath() const override;
-    const QMimeType &mimeType() const override;
     QString inputActionText() const override;
 protected:
     QString name_;
     QString path_;
     QString completion_;
-    QMimeType mimetype_;
 
 };
