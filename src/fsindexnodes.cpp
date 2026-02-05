@@ -138,12 +138,18 @@ void DirNode::update(const shared_ptr<DirNode>& shared_this,
             // Index structure
             if (fi.isDir()) {
                 auto is_indexed = cit != children_.end() && (*cit)->name_ == fi.fileName();
-                if (exclude || settings.max_depth < depth || (fi.isSymLink() && !settings.follow_symlinks)){
-                    if (is_indexed) {
+                if (exclude
+                    || (settings.max_depth < depth && settings.max_depth > 0) // 0 means no limit
+                    || (fi.isSymLink() && !settings.follow_symlinks))
+                {
+                    if (is_indexed)
+                    {
                         (*cit)->removeChildren();
                         cit = children_.erase(cit);
                     }
-                } else {
+                }
+                else
+                {
                     if (!is_indexed)
                         cit = children_.emplace(cit, DirNode::make(fi.fileName(), shared_this));
                     (*cit)->update(*cit, abort, status, settings, indexed_dirs, depth+1);  // UPDATE new directories always
@@ -155,9 +161,10 @@ void DirNode::update(const shared_ptr<DirNode>& shared_this,
             static QMimeDatabase mdb;
             auto mime_type = mdb.mimeTypeForFile(fi);
             exclude = ranges::none_of(settings.mime_filters,
-                                      [mt = mime_type.name()](const auto &re) {
-                                          return re.match(mt).hasMatch();
-                                      }) || exclude || settings.max_depth < depth;
+                                      [mt = mime_type.name()](const auto &re)
+                                      { return re.match(mt).hasMatch(); })
+                      || exclude
+                      || (settings.max_depth < depth && settings.max_depth > 0);
             if (iit != items_.end() && (*iit)->name() == fi.fileName()) {  // _is_ already indexed
                 if (exclude)
                     iit = items_.erase(iit);

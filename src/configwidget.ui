@@ -150,6 +150,9 @@
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
+             <property name="specialValueText">
+              <string notr="true">∞</string>
+             </property>
              <property name="maximum">
               <number>255</number>
              </property>
