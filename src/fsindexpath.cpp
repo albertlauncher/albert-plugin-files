@@ -55,7 +55,7 @@ void FsIndexPath::update(const bool &abort, function<void(const QString &)> stat
     if (ranges::any_of(s.mime_filters,
                        [](const auto &re)
                        { return re.match(u"inode/directory"_s).hasMatch();}))
-        self = make_shared<StandardFile>(root_->filePath(), u"inode/directory"_s);
+        self = make_shared<StandardFile>(root_->filePath());
     else
         self.reset();
 
