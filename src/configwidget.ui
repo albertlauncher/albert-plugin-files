@@ -173,6 +173,9 @@
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
+             <property name="specialValueText">
+              <string notr="true">∞</string>
+             </property>
              <property name="suffix">
               <string extracomment="Abbr. minutes"> min</string>
              </property>
