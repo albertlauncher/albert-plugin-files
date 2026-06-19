@@ -147,6 +147,9 @@ void FsIndexPath::setScanInterval(uint minutes)
     if (minutes)
         scan_interval_timer_.start((int)(minutes*60000));
     else
+    {
+        scan_interval_timer_.setInterval(0);
         scan_interval_timer_.stop();
+    }
 }
 
