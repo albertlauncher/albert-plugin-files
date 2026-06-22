@@ -36,7 +36,7 @@ public:
     QString name() const override;
     QString description() const override;
     QString defaultTrigger() const override;
-    albert::ItemGenerator items(albert::QueryContext &) override;
+    albert::ItemGenerator items(albert::QueryContext) override;
 };
 
 class HomeBrowser : public FilePathBrowser
@@ -49,5 +49,5 @@ public:
     QString name() const override;
     QString description() const override;
     QString defaultTrigger() const override;
-    albert::ItemGenerator items(albert::QueryContext &) override;
+    albert::ItemGenerator items(albert::QueryContext) override;
 };

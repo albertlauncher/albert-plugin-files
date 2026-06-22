@@ -64,7 +64,7 @@ QString RootBrowser::description() const { return tr("Browse root directory by p
 
 QString RootBrowser::defaultTrigger() const { return u"/"_s; }
 
-ItemGenerator RootBrowser::items(QueryContext &ctx)
+ItemGenerator RootBrowser::items(QueryContext ctx)
 {
     vector<shared_ptr<Item>> results;
     const auto file_infos = listFiles(defaultTrigger() + ctx.query());
@@ -96,7 +96,7 @@ QString HomeBrowser::description() const { return tr("Browse home directory by p
 
 QString HomeBrowser::defaultTrigger() const { return u"~"_s; }
 
-ItemGenerator HomeBrowser::items(QueryContext &ctx)
+ItemGenerator HomeBrowser::items(QueryContext ctx)
 {
     vector<shared_ptr<Item>> results;
     const auto home_length = QDir::homePath().size();
