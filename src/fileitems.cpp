@@ -7,6 +7,7 @@
 #include <QFileInfo>
 #include <QGuiApplication>
 #include <QMimeData>
+#include <QTimer>
 #include <QUrl>
 #include <albert/icon.h>
 #include <albert/plugin/applications.h>
@@ -95,8 +96,10 @@ vector<Action> FileItem::actions() const
             QByteArray gnomeFormat = QByteArray("copy\n").append(QUrl::fromLocalFile(filePath()).toEncoded());
             newMimeData->setData(u"x-special/gnome-copied-files"_s, gnomeFormat);
 
-            // Set the mimedata
-            cb->setMimeData(newMimeData);
+            // Set the mimedata (with delay to avoid Wayland event deadlock)
+            QTimer::singleShot(10, [cb, newMimeData]() {
+                cb->setMimeData(newMimeData);
+            });
         });
 
     static const auto tr_cp = QCoreApplication::translate("FileItem", "Copy path to clipboard");
