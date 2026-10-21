@@ -88,7 +88,7 @@ bool MimeFilterDialog::eventFilter(QObject *watched, QEvent *event)
                     return true;
                 case Qt::Key_Enter:
                 case Qt::Key_Return:
-#ifdef Q_OS_MAC
+#ifdef Q_OS_MACOS
                     if (ui.listView_mimeTypes->currentIndex().isValid())
                             emit ui.listView_mimeTypes->activated(ui.listView_mimeTypes->currentIndex());
 #else
@@ -101,7 +101,7 @@ bool MimeFilterDialog::eventFilter(QObject *watched, QEvent *event)
         }
     }
 
-#ifdef Q_OS_MAC
+#ifdef Q_OS_MACOS
     if (watched == ui.listView_mimeTypes){
         if (event->type() == QEvent::KeyPress) {
             QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);

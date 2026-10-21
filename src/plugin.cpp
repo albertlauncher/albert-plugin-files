@@ -171,7 +171,7 @@ void Plugin::updateIndexItems()
     const auto t_trash_title = tr(c_trash_title);
 
     vector<Action> a;
-#if defined(Q_OS_MAC)
+#if defined(Q_OS_MACOS)
     a.emplace_back(u"open"_s, tr("Open trash"),
                    [=]{ openUrl(u"file://%1/.Trash"_s.arg(QDir::homePath())); });
     a.emplace_back(
